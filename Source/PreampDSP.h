@@ -89,7 +89,10 @@ void PreampDSP::process(const ProcessContext& context)
 
         for (size_t channel = 0; channel < numChannels; ++channel)
         {
-            float input = inputBlock.getSample(channel, sample);
+            auto ch = static_cast<int>(channel);
+            auto smp = static_cast<int>(sample);
+
+            float input = inputBlock.getSample(ch, smp);
 
             // Apply input drive
             float driven = input * (1.0f + drive * 3.0f);
@@ -113,7 +116,7 @@ void PreampDSP::process(const ProcessContext& context)
             // Output gain
             float output = dcBlocked * outGain;
 
-            outputBlock.setSample(channel, sample, output);
+            outputBlock.setSample(ch, smp, output);
         }
     }
 }

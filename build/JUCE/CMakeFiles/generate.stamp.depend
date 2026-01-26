@@ -1,0 +1,13 @@
+# CMake generation dependency list for this directory.
+D:/Program Files/CMake/share/cmake-4.2/Modules/BasicConfigVersion-ExactVersion.cmake.in
+D:/Program Files/CMake/share/cmake-4.2/Modules/CMakeDependentOption.cmake
+D:/Program Files/CMake/share/cmake-4.2/Modules/CMakePackageConfigHelpers.cmake
+D:/Program Files/CMake/share/cmake-4.2/Modules/WriteBasicConfigVersionFile.cmake
+D:/Repos/dre-dimura/build/CMakeFiles/cmake.verify_globs
+D:/repos/dre-dimura/JUCE/CMakeLists.txt
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/JUCECheckAtomic.cmake
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/JUCEConfig.cmake.in
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/JUCEHelperTargets.cmake
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/JUCEModuleSupport.cmake
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/JUCEUtils.cmake
+D:/repos/dre-dimura/JUCE/extras/Build/CMake/juce_runtime_arch_detection.cpp

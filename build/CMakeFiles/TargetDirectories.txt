@@ -1,0 +1,14 @@
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura.dir
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura_All.dir
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura_Standalone.dir
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura_rc_lib.dir
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura_VST3.dir
+D:/Repos/dre-dimura/build/CMakeFiles/DreDimura_vst3_helper.dir
+D:/Repos/dre-dimura/build/CMakeFiles/INSTALL.dir
+D:/Repos/dre-dimura/build/CMakeFiles/ALL_BUILD.dir
+D:/Repos/dre-dimura/build/CMakeFiles/ZERO_CHECK.dir
+D:/Repos/dre-dimura/build/JUCE/CMakeFiles/INSTALL.dir
+D:/Repos/dre-dimura/build/JUCE/CMakeFiles/ALL_BUILD.dir
+D:/Repos/dre-dimura/build/JUCE/modules/CMakeFiles/INSTALL.dir
+D:/Repos/dre-dimura/build/JUCE/extras/Build/CMakeFiles/INSTALL.dir
+D:/Repos/dre-dimura/build/JUCE/extras/Build/juceaide/CMakeFiles/INSTALL.dir

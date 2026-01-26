@@ -40,10 +40,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createPa
         "Drive",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.25f,
-        juce::String(),
-        juce::AudioProcessorParameter::genericParameter,
-        [](float value, int) { return juce::String(int(value * 100)) + "%"; },
-        nullptr
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
     ));
 
     // Tone: 0% (dark) to 100% (bright), default 50%
@@ -52,10 +50,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createPa
         "Tone",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.5f,
-        juce::String(),
-        juce::AudioProcessorParameter::genericParameter,
-        [](float value, int) { return juce::String(int(value * 100)) + "%"; },
-        nullptr
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
     ));
 
     // Output: 0% to 100%, default 50% (unity gain)
@@ -64,13 +60,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createPa
         "Output",
         juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
         0.5f,
-        juce::String(),
-        juce::AudioProcessorParameter::genericParameter,
-        [](float value, int) {
-            float db = -12.0f + (value * 18.0f);
-            return juce::String(db, 1) + " dB";
-        },
-        nullptr
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) {
+                float db = -12.0f + (value * 18.0f);
+                return juce::String(db, 1) + " dB";
+            })
     ));
 
     // Bypass
