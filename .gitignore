@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# CMake build directory
+build/
+cmake-build-*/
+
+# WebView2 user data
+*_WebView2/
+
 # User-specific files
 *.rsuser
 *.suo
