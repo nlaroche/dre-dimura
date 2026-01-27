@@ -1,5 +1,7 @@
 import React, { useRef, useCallback } from 'react';
 
+type KnobSize = 'small' | 'medium' | 'large';
+
 interface KnobProps {
   value: number;
   onChange: (value: number) => void;
@@ -8,9 +10,14 @@ interface KnobProps {
   label: string;
   min?: number;
   max?: number;
-  size?: number;
-  color?: string;
+  size?: KnobSize;
 }
+
+const sizeMap: Record<KnobSize, number> = {
+  small: 52,
+  medium: 64,
+  large: 80,
+};
 
 export function Knob({
   value,
@@ -20,14 +27,14 @@ export function Knob({
   label,
   min = 0,
   max = 1,
-  size = 80,
-  color = '#c9a227',
+  size = 'medium',
 }: KnobProps) {
   const knobRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
   const startY = useRef(0);
   const startValue = useRef(0);
 
+  const sizeInPixels = sizeMap[size];
   const normalizedValue = (value - min) / (max - min);
   const rotation = -135 + normalizedValue * 270;
 
@@ -63,22 +70,28 @@ export function Knob({
     [value, min, max, onChange, onDragStart, onDragEnd]
   );
 
+  const handleDoubleClick = useCallback(() => {
+    onChange((max - min) / 2 + min);
+  }, [onChange, min, max]);
+
   const displayValue = Math.round(normalizedValue * 100);
 
   return (
-    <div className="knob-container" style={{ width: size }}>
+    <div className={`knob-container ${size}`}>
       <div
         ref={knobRef}
         className="knob"
         style={{
-          width: size,
-          height: size,
+          width: sizeInPixels,
+          height: sizeInPixels,
           transform: `rotate(${rotation}deg)`,
-          cursor: 'grab',
         }}
         onMouseDown={handleMouseDown}
+        onDoubleClick={handleDoubleClick}
       >
-        <div className="knob-indicator" style={{ backgroundColor: color }} />
+        <div className="knob-cap">
+          <div className="knob-indicator" />
+        </div>
       </div>
       <div className="knob-value">{displayValue}%</div>
       <div className="knob-label">{label}</div>

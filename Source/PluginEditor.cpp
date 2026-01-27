@@ -38,9 +38,9 @@ DreDimuraEditor::DreDimuraEditor(DreDimuraProcessor& p)
     bypassAttachment = std::make_unique<juce::WebToggleButtonParameterAttachment>(
         *apvts.getParameter(ParameterIDs::bypass), *bypassRelay, nullptr);
 
-    setSize(500, 350);
+    setSize(900, 520);
     setResizable(true, true);
-    setResizeLimits(400, 280, 800, 560);
+    setResizeLimits(800, 460, 1200, 700);
 }
 
 DreDimuraEditor::~DreDimuraEditor()
