@@ -183,12 +183,29 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    // Measure input levels before processing
+    const float decay = 0.9f;  // Smooth decay for meter ballistics
+
+    if (totalNumInputChannels > 0)
+    {
+        float peakL = buffer.getMagnitude(0, 0, buffer.getNumSamples());
+        inputLevelL.store(std::max(peakL, inputLevelL.load() * decay));
+    }
+    if (totalNumInputChannels > 1)
+    {
+        float peakR = buffer.getMagnitude(1, 0, buffer.getNumSamples());
+        inputLevelR.store(std::max(peakR, inputLevelR.load() * decay));
+    }
+
     // Check bypass
     bool bypassed = bypassParam->load() > 0.5f;
 
     if (bypassed)
     {
         preampDSP.reset();  // Reset smoothed values to prevent clicks
+        // Reset output meters when bypassed
+        outputLevelL.store(outputLevelL.load() * decay);
+        outputLevelR.store(outputLevelR.load() * decay);
         return;
     }
 
@@ -201,6 +218,18 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     preampDSP.process(context);
+
+    // Measure output levels after processing
+    if (totalNumOutputChannels > 0)
+    {
+        float peakL = buffer.getMagnitude(0, 0, buffer.getNumSamples());
+        outputLevelL.store(std::max(peakL, outputLevelL.load() * decay));
+    }
+    if (totalNumOutputChannels > 1)
+    {
+        float peakR = buffer.getMagnitude(1, 0, buffer.getNumSamples());
+        outputLevelR.store(std::max(peakR, outputLevelR.load() * decay));
+    }
 }
 
 //==============================================================================

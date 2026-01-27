@@ -205,6 +205,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .controls-panel {
@@ -481,6 +482,9 @@ body {
    CAROUSEL ARROWS
    ============================================ */
 .carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -490,9 +494,16 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 50%;
   cursor: pointer;
-  transition: all 0.2s ease;
-  margin: 0 12px;
-  flex-shrink: 0;
+  transition: all 0.15s ease;
+  z-index: 10;
+}
+
+.carousel-arrow.left {
+  left: 12px;
+}
+
+.carousel-arrow.right {
+  right: 12px;
 }
 
 .carousel-arrow svg {
@@ -551,74 +562,78 @@ body {
 
 /* ============================================
    CAROUSEL TRANSITIONS
+   Fast, snappy crossfade
    ============================================ */
 .plugin-background {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.2s ease-out;
 }
 
 .plugin-background.transitioning-left,
 .plugin-background.transitioning-right {
-  animation: bgFade 0.6s ease;
+  animation: bgCrossfade 0.2s ease-out;
 }
 
-@keyframes bgFade {
-  0% { opacity: 1; }
-  50% { opacity: 0; }
-  100% { opacity: 1; }
+@keyframes bgCrossfade {
+  0% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.75;
+    filter: brightness(0.85);
+  }
+  100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
 }
 
 .plugin-content {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease;
 }
 
 .plugin-content.content-transitioning-right {
-  animation: slideOutLeft 0.3s ease forwards, slideInRight 0.3s ease 0.3s forwards;
+  animation: slideRight 0.2s ease-out;
 }
 
 .plugin-content.content-transitioning-left {
-  animation: slideOutRight 0.3s ease forwards, slideInLeft 0.3s ease 0.3s forwards;
+  animation: slideLeft 0.2s ease-out;
 }
 
-@keyframes slideOutLeft {
+@keyframes slideRight {
   0% {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
-  100% {
-    transform: translateX(-30px);
+  40% {
+    transform: translateX(-12px) scale(0.99);
     opacity: 0;
   }
-}
-
-@keyframes slideInRight {
-  0% {
-    transform: translateX(30px);
+  60% {
+    transform: translateX(12px) scale(0.99);
     opacity: 0;
   }
   100% {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
 
-@keyframes slideOutRight {
+@keyframes slideLeft {
   0% {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
-  100% {
-    transform: translateX(30px);
+  40% {
+    transform: translateX(12px) scale(0.99);
     opacity: 0;
   }
-}
-
-@keyframes slideInLeft {
-  0% {
-    transform: translateX(-30px);
+  60% {
+    transform: translateX(-12px) scale(0.99);
     opacity: 0;
   }
   100% {
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
     opacity: 1;
   }
 }
@@ -781,4 +796,567 @@ body {
 
 .plugin-container.nightfall .carousel-arrow:hover:not(.disabled) svg {
   color: #d0d8e8;
+}
+
+/* ============================================
+   FILAMENT PANEL LAYOUT
+   Sleek digital preamp with oscilloscope
+   ============================================ */
+.filament-panel {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px 36px 16px;
+}
+
+.filament-main-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.filament-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filament-color-row {
+  width: 100%;
+  max-width: 320px;
+  padding: 0 20px;
+}
+
+/* ============================================
+   FILAMENT SLIDER
+   ============================================ */
+.filament-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.filament-slider .slider-label {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5a70a0;
+  min-width: 45px;
+}
+
+.filament-slider .slider-track {
+  flex: 1;
+  height: 8px;
+  background: #0c0e14;
+  border: 1px solid rgba(80, 144, 208, 0.15);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  overflow: visible;
+}
+
+.filament-slider .slider-fill {
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  bottom: 1px;
+  background: linear-gradient(90deg, #3060a0, #5090d0, #70b0f0);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.filament-slider .slider-glow {
+  position: absolute;
+  top: -4px;
+  left: 0;
+  bottom: -4px;
+  background: linear-gradient(90deg,
+    rgba(48, 96, 160, 0.1),
+    rgba(80, 144, 208, 0.25),
+    rgba(112, 176, 240, 0.3)
+  );
+  filter: blur(6px);
+  pointer-events: none;
+  border-radius: 4px;
+}
+
+.filament-slider .slider-thumb {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(145deg, #2a3040 0%, #1c2030 100%);
+  border: 1px solid rgba(112, 176, 240, 0.4);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  cursor: grab;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.4),
+    0 0 8px rgba(112, 176, 240, 0.2),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.filament-slider .slider-thumb::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  background: #70b0f0;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 6px rgba(112, 176, 240, 0.6);
+}
+
+.filament-slider .slider-track:hover .slider-thumb {
+  transform: translate(-50%, -50%) scale(1.1);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.5),
+    0 0 12px rgba(112, 176, 240, 0.35),
+    inset 0 1px 0 rgba(255,255,255,0.05);
+}
+
+.filament-slider .slider-track:active .slider-thumb {
+  cursor: grabbing;
+}
+
+.filament-slider .slider-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #7090d0;
+  min-width: 32px;
+  text-align: right;
+}
+
+/* Filament Oscilloscope Display */
+.oscilloscope {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.oscilloscope-display {
+  width: 180px;
+  height: 65px;
+  background: linear-gradient(180deg, #080a10 0%, #0c0e14 100%);
+  border: 1px solid #1a2030;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    inset 0 2px 10px rgba(0,0,0,0.6),
+    inset 0 0 30px rgba(0,0,0,0.3),
+    0 2px 8px rgba(0,0,0,0.4),
+    0 0 20px rgba(80, 144, 208, 0.05);
+}
+
+.oscilloscope-display svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Data particles floating effect */
+.data-particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #70a0d0;
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.data-particle.p1 {
+  animation: particleFloat 4s ease-in-out infinite;
+}
+
+.data-particle.p2 {
+  animation: particleFloat 5s ease-in-out 1s infinite;
+}
+
+.data-particle.p3 {
+  animation: particleFloat 3.5s ease-in-out 2s infinite;
+}
+
+.data-particle.p4 {
+  animation: particleFloat 4.5s ease-in-out 0.5s infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    left: 10%;
+    top: 80%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  80% {
+    opacity: 0.8;
+  }
+  100% {
+    left: 90%;
+    top: 20%;
+    opacity: 0;
+  }
+}
+
+/* Scan beam effect */
+.scan-beam {
+  position: absolute;
+  top: 0;
+  left: -10%;
+  width: 10%;
+  height: 100%;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(80, 144, 208, 0.1),
+    rgba(112, 176, 240, 0.15),
+    rgba(80, 144, 208, 0.1),
+    transparent
+  );
+  animation: scanBeam 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanBeam {
+  0% { left: -10%; }
+  100% { left: 100%; }
+}
+
+/* Oscilloscope glow border */
+.oscilloscope-display::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 1px solid transparent;
+  border-image: linear-gradient(180deg,
+    rgba(80, 144, 208, 0.3) 0%,
+    rgba(80, 144, 208, 0.1) 50%,
+    rgba(80, 144, 208, 0.2) 100%
+  ) 1;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Level bar below oscilloscope */
+.oscilloscope-level {
+  width: 160px;
+  height: 4px;
+  background: #0c0e14;
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid rgba(80, 144, 208, 0.1);
+}
+
+.oscilloscope-level .level-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3060a0, #5090d0, #70b0f0);
+  border-radius: 2px;
+  transition: width 0.1s ease;
+  box-shadow: 0 0 8px rgba(80, 144, 208, 0.4);
+}
+
+/* Mini Meters for Input/Output */
+.mini-meter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mini-meter-track {
+  width: 6px;
+  height: 50px;
+  background: #0c0e14;
+  border: 1px solid rgba(80, 144, 208, 0.1);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mini-meter-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, #70b0f0, #5090d0, #3060a0);
+  border-radius: 2px;
+  transition: height 0.1s ease;
+}
+
+.mini-meter-glow {
+  position: absolute;
+  bottom: 0;
+  left: -2px;
+  right: -2px;
+  background: linear-gradient(180deg, rgba(112, 176, 240, 0.6), transparent);
+  filter: blur(3px);
+  transition: height 0.1s ease;
+  pointer-events: none;
+}
+
+.mini-meter-label {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #5070a0;
+}
+
+/* ============================================
+   STEEL PLATE THEME
+   Industrial grey with red accents
+   ============================================ */
+.plugin-container.steelplate {
+  --bg-dark: #141416;
+  --bg-panel: rgba(26, 26, 30, 0.85);
+  --text-primary: #d0d0d4;
+  --text-muted: #808088;
+  --text-dim: #505058;
+
+  --accent-warm: #a04050;
+  --accent-green: #606068;
+  --accent-glow: rgba(160, 64, 80, 0.4);
+}
+
+.plugin-container.steelplate .brand-name {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  background: linear-gradient(
+    180deg,
+    #e0e0e4 0%,
+    #a0a0a8 40%,
+    #707078 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+}
+
+.plugin-container.steelplate .brand-name::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #606068 20%,
+    #606068 80%,
+    transparent 100%
+  );
+  opacity: 0.3;
+}
+
+.plugin-container.steelplate .brand-subtitle {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-weight: 400;
+  letter-spacing: 3px;
+  color: #707078;
+}
+
+.plugin-container.steelplate .controls-panel {
+  background: rgba(22, 22, 26, 0.9);
+  border: 1px solid rgba(80, 80, 88, 0.2);
+  border-top-color: rgba(100, 100, 108, 0.25);
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 4px 20px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    inset 0 -1px 0 rgba(0,0,0,0.2);
+}
+
+.plugin-container.steelplate .controls-panel::before {
+  opacity: 0.025;
+}
+
+.plugin-container.steelplate .knob::before {
+  background: #18181c;
+  box-shadow:
+    inset 0 3px 8px rgba(0,0,0,0.6),
+    inset 0 -1px 2px rgba(255,255,255,0.03);
+}
+
+.plugin-container.steelplate .knob::after {
+  background:
+    conic-gradient(
+      from 45deg,
+      #38383c 0deg,
+      #48484c 90deg,
+      #28282c 180deg,
+      #3c3c40 270deg,
+      #38383c 360deg
+    );
+  box-shadow:
+    0 3px 10px rgba(0,0,0,0.5),
+    0 1px 3px rgba(0,0,0,0.3);
+}
+
+.plugin-container.steelplate .knob-indicator {
+  background: linear-gradient(180deg, #d04050 0%, #a03040 100%);
+  box-shadow:
+    0 0 8px rgba(160, 64, 80, 0.5),
+    0 0 16px rgba(160, 64, 80, 0.2);
+}
+
+.plugin-container.steelplate .knob-value {
+  color: #909098;
+}
+
+.plugin-container.steelplate .knob-label {
+  color: #707078;
+}
+
+.plugin-container.steelplate .bypass-toggle.active .bypass-light {
+  background: #a04050;
+  box-shadow: 0 0 8px rgba(160, 64, 80, 0.5);
+}
+
+.plugin-container.steelplate .indicator.active {
+  background: #a04050;
+  box-shadow: 0 0 8px rgba(160, 64, 80, 0.4);
+}
+
+.plugin-container.steelplate .carousel-arrow:hover:not(.disabled) svg {
+  color: #d0d0d4;
+}
+
+/* ============================================
+   STEEL PLATE PANEL LAYOUT
+   Wide industrial preamp
+   ============================================ */
+.steelplate-panel {
+  flex-direction: row;
+  align-items: center;
+  gap: 36px;
+  padding: 28px 44px;
+}
+
+/* Steel Plate Divider */
+.steelplate-divider {
+  width: 2px;
+  height: 80px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    #2a2a30 15%,
+    #3a3a40 50%,
+    #2a2a30 85%,
+    transparent 100%
+  );
+  margin: 0 8px;
+}
+
+/* Steel Plate Spectrum Visualizer - Shader style */
+.spectrum-visualizer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.spectrum-display {
+  width: 160px;
+  height: 70px;
+  background: linear-gradient(180deg, #08080a 0%, #0c0c10 100%);
+  border: 2px solid #1a1a20;
+  border-top-color: #141418;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    inset 0 2px 10px rgba(0,0,0,0.7),
+    inset 0 0 20px rgba(0,0,0,0.3),
+    0 2px 6px rgba(0,0,0,0.4);
+}
+
+.spectrum-display svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Animated energy streaks */
+.energy-streak {
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c04050, transparent);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.energy-streak.streak-1 {
+  width: 60%;
+  top: 15%;
+  left: -60%;
+  animation: energySweep 3s ease-in-out infinite;
+}
+
+.energy-streak.streak-2 {
+  width: 40%;
+  top: 45%;
+  left: -40%;
+  animation: energySweep 4s ease-in-out 1s infinite;
+}
+
+.energy-streak.streak-3 {
+  width: 50%;
+  top: 75%;
+  left: -50%;
+  animation: energySweep 3.5s ease-in-out 2s infinite;
+}
+
+@keyframes energySweep {
+  0% {
+    left: -60%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+/* Corner glow accents */
+.spectrum-display::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    #a04050 20%,
+    #c05060 50%,
+    #a04050 80%,
+    transparent 100%
+  );
+  opacity: 0.3;
+  z-index: 10;
+}
+
+.spectrum-display::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 15px;
+  background: linear-gradient(180deg, transparent, rgba(160, 64, 80, 0.1));
+  pointer-events: none;
 }

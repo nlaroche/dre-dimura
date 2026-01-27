@@ -104,6 +104,24 @@ private:
     PreampDSP preampDSP;
 
     //==============================================================================
+    // Metering - atomic for thread-safe access from UI
+    std::atomic<float> inputLevelL{ 0.0f };
+    std::atomic<float> inputLevelR{ 0.0f };
+    std::atomic<float> outputLevelL{ 0.0f };
+    std::atomic<float> outputLevelR{ 0.0f };
+
+public:
+    // Level getters for UI metering
+    float getInputLevel() const { return std::max(inputLevelL.load(), inputLevelR.load()); }
+    float getOutputLevel() const { return std::max(outputLevelL.load(), outputLevelR.load()); }
+    float getInputLevelL() const { return inputLevelL.load(); }
+    float getInputLevelR() const { return inputLevelR.load(); }
+    float getOutputLevelL() const { return outputLevelL.load(); }
+    float getOutputLevelR() const { return outputLevelR.load(); }
+
+private:
+
+    //==============================================================================
     // BeatConnect project data
     juce::String pluginId_;
     juce::String apiBaseUrl_;

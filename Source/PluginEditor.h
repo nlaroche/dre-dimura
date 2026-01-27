@@ -14,7 +14,8 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class DreDimuraEditor : public juce::AudioProcessorEditor
+class DreDimuraEditor : public juce::AudioProcessorEditor,
+                        private juce::Timer
 {
 public:
     explicit DreDimuraEditor(DreDimuraProcessor&);
@@ -50,6 +51,10 @@ private:
     //==============================================================================
     void setupWebView();
     void setupRelays();
+
+    //==============================================================================
+    // Timer callback for meter updates
+    void timerCallback() override;
 
     //==============================================================================
     // Activation handlers (always declared, conditionally implemented)

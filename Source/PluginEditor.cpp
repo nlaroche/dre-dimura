@@ -41,10 +41,14 @@ DreDimuraEditor::DreDimuraEditor(DreDimuraProcessor& p)
     setSize(900, 520);
     setResizable(true, true);
     setResizeLimits(800, 460, 1200, 700);
+
+    // Start meter update timer (30 fps for smooth metering)
+    startTimerHz(30);
 }
 
 DreDimuraEditor::~DreDimuraEditor()
 {
+    stopTimer();
 }
 
 //==============================================================================
@@ -300,6 +304,24 @@ void DreDimuraEditor::handleDeactivateLicense([[maybe_unused]] const juce::var& 
 void DreDimuraEditor::handleGetActivationStatus()
 {
     sendActivationState();
+}
+
+//==============================================================================
+void DreDimuraEditor::timerCallback()
+{
+    if (!webView)
+        return;
+
+    // Get levels from processor
+    juce::DynamicObject::Ptr data = new juce::DynamicObject();
+    data->setProperty("inputLevel", processorRef.getInputLevel());
+    data->setProperty("outputLevel", processorRef.getOutputLevel());
+    data->setProperty("inputLevelL", processorRef.getInputLevelL());
+    data->setProperty("inputLevelR", processorRef.getInputLevelR());
+    data->setProperty("outputLevelL", processorRef.getOutputLevelL());
+    data->setProperty("outputLevelR", processorRef.getOutputLevelR());
+
+    webView->emitEventIfBrowserIsVisible("audioLevels", juce::var(data.get()));
 }
 
 //==============================================================================
