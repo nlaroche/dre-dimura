@@ -38,6 +38,42 @@ DreDimuraEditor::DreDimuraEditor(DreDimuraProcessor& p)
     bypassAttachment = std::make_unique<juce::WebToggleButtonParameterAttachment>(
         *apvts.getParameter(ParameterIDs::bypass), *bypassRelay, nullptr);
 
+    // Cathode effect attachments
+    cathEmberAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::cath_ember), *cathEmberRelay, nullptr);
+    cathHazeAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::cath_haze), *cathHazeRelay, nullptr);
+    cathEchoAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::cath_echo), *cathEchoRelay, nullptr);
+    cathDriftAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::cath_drift), *cathDriftRelay, nullptr);
+    cathVelvetAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::cath_velvet), *cathVelvetRelay, nullptr);
+
+    // Filament effect attachments
+    filFractureAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::fil_fracture), *filFractureRelay, nullptr);
+    filGlistenAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::fil_glisten), *filGlistenRelay, nullptr);
+    filCascadeAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::fil_cascade), *filCascadeRelay, nullptr);
+    filPhaseAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::fil_phase), *filPhaseRelay, nullptr);
+    filPrismAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::fil_prism), *filPrismRelay, nullptr);
+
+    // Steel Plate effect attachments
+    steelScorchAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::steel_scorch), *steelScorchRelay, nullptr);
+    steelRustAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::steel_rust), *steelRustRelay, nullptr);
+    steelGrindAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::steel_grind), *steelGrindRelay, nullptr);
+    steelShredAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::steel_shred), *steelShredRelay, nullptr);
+    steelSnarlAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::steel_snarl), *steelSnarlRelay, nullptr);
+
     setSize(900, 520);
     setResizable(true, true);
     setResizeLimits(800, 460, 1200, 700);
@@ -59,6 +95,27 @@ void DreDimuraEditor::setupRelays()
     toneRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::tone);
     outputRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::output);
     bypassRelay = std::make_unique<juce::WebToggleButtonRelay>(ParameterIDs::bypass);
+
+    // Cathode effect relays
+    cathEmberRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::cath_ember);
+    cathHazeRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::cath_haze);
+    cathEchoRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::cath_echo);
+    cathDriftRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::cath_drift);
+    cathVelvetRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::cath_velvet);
+
+    // Filament effect relays
+    filFractureRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::fil_fracture);
+    filGlistenRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::fil_glisten);
+    filCascadeRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::fil_cascade);
+    filPhaseRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::fil_phase);
+    filPrismRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::fil_prism);
+
+    // Steel Plate effect relays
+    steelScorchRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::steel_scorch);
+    steelRustRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::steel_rust);
+    steelGrindRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::steel_grind);
+    steelShredRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::steel_shred);
+    steelSnarlRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::steel_snarl);
 }
 
 //==============================================================================
@@ -128,6 +185,24 @@ void DreDimuraEditor::setupWebView()
         .withOptionsFrom(*toneRelay)
         .withOptionsFrom(*outputRelay)
         .withOptionsFrom(*bypassRelay)
+        // Cathode effect relays
+        .withOptionsFrom(*cathEmberRelay)
+        .withOptionsFrom(*cathHazeRelay)
+        .withOptionsFrom(*cathEchoRelay)
+        .withOptionsFrom(*cathDriftRelay)
+        .withOptionsFrom(*cathVelvetRelay)
+        // Filament effect relays
+        .withOptionsFrom(*filFractureRelay)
+        .withOptionsFrom(*filGlistenRelay)
+        .withOptionsFrom(*filCascadeRelay)
+        .withOptionsFrom(*filPhaseRelay)
+        .withOptionsFrom(*filPrismRelay)
+        // Steel Plate effect relays
+        .withOptionsFrom(*steelScorchRelay)
+        .withOptionsFrom(*steelRustRelay)
+        .withOptionsFrom(*steelGrindRelay)
+        .withOptionsFrom(*steelShredRelay)
+        .withOptionsFrom(*steelSnarlRelay)
         // Activation event listeners
         .withEventListener("activateLicense", [this](const juce::var& data) {
             handleActivateLicense(data);

@@ -41,12 +41,54 @@ private:
     std::unique_ptr<juce::WebSliderRelay> outputRelay;
     std::unique_ptr<juce::WebToggleButtonRelay> bypassRelay;
 
+    // Cathode effect relays
+    std::unique_ptr<juce::WebSliderRelay> cathEmberRelay;
+    std::unique_ptr<juce::WebSliderRelay> cathHazeRelay;
+    std::unique_ptr<juce::WebSliderRelay> cathEchoRelay;
+    std::unique_ptr<juce::WebSliderRelay> cathDriftRelay;
+    std::unique_ptr<juce::WebSliderRelay> cathVelvetRelay;
+
+    // Filament effect relays
+    std::unique_ptr<juce::WebSliderRelay> filFractureRelay;
+    std::unique_ptr<juce::WebSliderRelay> filGlistenRelay;
+    std::unique_ptr<juce::WebSliderRelay> filCascadeRelay;
+    std::unique_ptr<juce::WebSliderRelay> filPhaseRelay;
+    std::unique_ptr<juce::WebSliderRelay> filPrismRelay;
+
+    // Steel Plate effect relays
+    std::unique_ptr<juce::WebSliderRelay> steelScorchRelay;
+    std::unique_ptr<juce::WebSliderRelay> steelRustRelay;
+    std::unique_ptr<juce::WebSliderRelay> steelGrindRelay;
+    std::unique_ptr<juce::WebSliderRelay> steelShredRelay;
+    std::unique_ptr<juce::WebSliderRelay> steelSnarlRelay;
+
     //==============================================================================
     // Parameter Attachments - created AFTER WebView
     std::unique_ptr<juce::WebSliderParameterAttachment> driveAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> toneAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> outputAttachment;
     std::unique_ptr<juce::WebToggleButtonParameterAttachment> bypassAttachment;
+
+    // Cathode effect attachments
+    std::unique_ptr<juce::WebSliderParameterAttachment> cathEmberAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> cathHazeAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> cathEchoAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> cathDriftAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> cathVelvetAttachment;
+
+    // Filament effect attachments
+    std::unique_ptr<juce::WebSliderParameterAttachment> filFractureAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> filGlistenAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> filCascadeAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> filPhaseAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> filPrismAttachment;
+
+    // Steel Plate effect attachments
+    std::unique_ptr<juce::WebSliderParameterAttachment> steelScorchAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> steelRustAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> steelGrindAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> steelShredAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> steelSnarlAttachment;
 
     //==============================================================================
     void setupWebView();

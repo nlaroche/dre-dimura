@@ -99,6 +99,27 @@ private:
     std::atomic<float>* outputParam = nullptr;
     std::atomic<float>* bypassParam = nullptr;
 
+    // Cathode effect parameters
+    std::atomic<float>* cathEmberParam = nullptr;
+    std::atomic<float>* cathHazeParam = nullptr;
+    std::atomic<float>* cathEchoParam = nullptr;
+    std::atomic<float>* cathDriftParam = nullptr;
+    std::atomic<float>* cathVelvetParam = nullptr;
+
+    // Filament effect parameters
+    std::atomic<float>* filFractureParam = nullptr;
+    std::atomic<float>* filGlistenParam = nullptr;
+    std::atomic<float>* filCascadeParam = nullptr;
+    std::atomic<float>* filPhaseParam = nullptr;
+    std::atomic<float>* filPrismParam = nullptr;
+
+    // Steel Plate effect parameters
+    std::atomic<float>* steelScorchParam = nullptr;
+    std::atomic<float>* steelRustParam = nullptr;
+    std::atomic<float>* steelGrindParam = nullptr;
+    std::atomic<float>* steelShredParam = nullptr;
+    std::atomic<float>* steelSnarlParam = nullptr;
+
     //==============================================================================
     // DSP
     PreampDSP preampDSP;

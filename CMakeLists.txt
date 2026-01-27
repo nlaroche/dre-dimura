@@ -40,21 +40,19 @@ target_sources(${PROJECT_NAME}
         Source/ParameterIDs.h
         Source/PreampDSP.cpp
         Source/PreampDSP.h
+        Source/Effects/EffectsDSP.cpp
+        Source/Effects/EffectsDSP.h
 )
 
 target_compile_definitions(${PROJECT_NAME}
     PUBLIC
         JUCE_WEB_BROWSER=1
-        JUCE_DISPLAY_SPLASH_SCREEN=0
+        JUCE_USE_WIN_WEBVIEW2=1
+        JUCE_USE_WIN_WEBVIEW2_WITH_STATIC_LINKING=1
+        JUCE_USE_CURL=0
         JUCE_VST3_CAN_REPLACE_VST2=0
-        JUCE_STRICT_REFCOUNTEDPOINTER=1
-        $<IF:$<BOOL:${DRE_DIMURA_DEV_MODE}>,DRE_DIMURA_DEV_MODE=1,DRE_DIMURA_DEV_MODE=0>
+        DRE_DIMURA_DEV_MODE=0
 )
-
-# Windows WebView2 support
-if(WIN32)
-    target_compile_definitions(${PROJECT_NAME} PUBLIC JUCE_USE_WIN_WEBVIEW2=1)
-endif()
 
 # BeatConnect SDK Integration
 if(EXISTS "${CMAKE_SOURCE_DIR}/resources/project_data.json")
@@ -77,24 +75,38 @@ else()
     target_compile_definitions(${PROJECT_NAME} PUBLIC BEATCONNECT_ACTIVATION_ENABLED=0)
 endif()
 
-# Copy web resources to plugin bundle
-if(NOT DRE_DIMURA_DEV_MODE)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/Resources/WebUI/index.html")
-        juce_add_binary_data(${PROJECT_NAME}_WebAssets
-            HEADER_NAME "WebAssets.h"
-            NAMESPACE WebAssets
-            SOURCES
-                Resources/WebUI/index.html
-                Resources/WebUI/assets/index.js
-                Resources/WebUI/assets/index.css
-        )
-        target_link_libraries(${PROJECT_NAME} PRIVATE ${PROJECT_NAME}_WebAssets)
-        target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_WEB_ASSETS=1)
-    else()
-        target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_WEB_ASSETS=0)
-    endif()
-else()
-    target_compile_definitions(${PROJECT_NAME} PUBLIC HAS_WEB_ASSETS=0)
+# Copy WebUI resources after build (for production)
+# Copy to Standalone
+add_custom_command(TARGET ${PROJECT_NAME}_Standalone POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Resources/WebUI"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}_Standalone>/Resources/WebUI"
+    COMMENT "Copying WebUI resources to Standalone..."
+)
+# Copy to VST3 build output
+add_custom_command(TARGET ${PROJECT_NAME}_VST3 POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/Resources/WebUI"
+        "$<TARGET_FILE_DIR:${PROJECT_NAME}_VST3>/../Resources/WebUI"
+    COMMENT "Copying WebUI resources to VST3..."
+)
+# Copy to AU build output (macOS only)
+if(APPLE)
+    add_custom_command(TARGET ${PROJECT_NAME}_AU POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/Resources/WebUI"
+            "$<TARGET_FILE_DIR:${PROJECT_NAME}_AU>/../Resources/WebUI"
+        COMMENT "Copying WebUI resources to AU..."
+    )
+endif()
+# Copy to installed VST3 location (Windows)
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT_NAME}_VST3 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/Resources/WebUI"
+            "$ENV{CommonProgramFiles}/VST3/Dre-Dimura.vst3/Contents/Resources/WebUI"
+        COMMENT "Copying WebUI resources to installed VST3..."
+    )
 endif()
 
 target_link_libraries(${PROJECT_NAME}

@@ -24,6 +24,25 @@ void PreampDSP::prepare(const juce::dsp::ProcessSpec& spec)
     dcBlockerL.coefficients = dcCoeffs;
     dcBlockerR.coefficients = dcCoeffs;
 
+    // Prepare all effects
+    cathEmber.prepare(spec);
+    cathHaze.prepare(spec);
+    cathEcho.prepare(spec);
+    cathDrift.prepare(spec);
+    cathVelvet.prepare(spec);
+
+    filFracture.prepare(spec);
+    filGlisten.prepare(spec);
+    filCascade.prepare(spec);
+    filPhase.prepare(spec);
+    filPrism.prepare(spec);
+
+    steelScorch.prepare(spec);
+    steelRust.prepare(spec);
+    steelGrind.prepare(spec);
+    steelShred.prepare(spec);
+    steelSnarl.prepare(spec);
+
     reset();
 }
 
@@ -41,6 +60,25 @@ void PreampDSP::reset()
     driveGain.reset(sampleRate, 0.02);
     toneValue.reset(sampleRate, 0.02);
     outputGain.reset(sampleRate, 0.02);
+
+    // Reset all effects
+    cathEmber.reset();
+    cathHaze.reset();
+    cathEcho.reset();
+    cathDrift.reset();
+    cathVelvet.reset();
+
+    filFracture.reset();
+    filGlisten.reset();
+    filCascade.reset();
+    filPhase.reset();
+    filPrism.reset();
+
+    steelScorch.reset();
+    steelRust.reset();
+    steelGrind.reset();
+    steelShred.reset();
+    steelSnarl.reset();
 }
 
 void PreampDSP::setDrive(float newDrive)
@@ -101,3 +139,30 @@ float PreampDSP::processSample(float input)
     float transformed = transformerSaturate(input);
     return softClip(transformed);
 }
+
+// ======================================
+// Cathode Effect Setters
+// ======================================
+void PreampDSP::setCathEmber(float mix) { cathEmber.setMix(mix); }
+void PreampDSP::setCathHaze(float mix) { cathHaze.setMix(mix); }
+void PreampDSP::setCathEcho(float mix) { cathEcho.setMix(mix); }
+void PreampDSP::setCathDrift(float mix) { cathDrift.setMix(mix); }
+void PreampDSP::setCathVelvet(float mix) { cathVelvet.setMix(mix); }
+
+// ======================================
+// Filament Effect Setters
+// ======================================
+void PreampDSP::setFilFracture(float mix) { filFracture.setMix(mix); }
+void PreampDSP::setFilGlisten(float mix) { filGlisten.setMix(mix); }
+void PreampDSP::setFilCascade(float mix) { filCascade.setMix(mix); }
+void PreampDSP::setFilPhase(float mix) { filPhase.setMix(mix); }
+void PreampDSP::setFilPrism(float mix) { filPrism.setMix(mix); }
+
+// ======================================
+// Steel Plate Effect Setters
+// ======================================
+void PreampDSP::setSteelScorch(float mix) { steelScorch.setMix(mix); }
+void PreampDSP::setSteelRust(float mix) { steelRust.setMix(mix); }
+void PreampDSP::setSteelGrind(float mix) { steelGrind.setMix(mix); }
+void PreampDSP::setSteelShred(float mix) { steelShred.setMix(mix); }
+void PreampDSP::setSteelSnarl(float mix) { steelSnarl.setMix(mix); }

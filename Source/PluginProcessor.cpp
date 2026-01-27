@@ -21,6 +21,27 @@ DreDimuraProcessor::DreDimuraProcessor()
     outputParam = apvts.getRawParameterValue(ParameterIDs::output);
     bypassParam = apvts.getRawParameterValue(ParameterIDs::bypass);
 
+    // Cache Cathode effect parameters
+    cathEmberParam = apvts.getRawParameterValue(ParameterIDs::cath_ember);
+    cathHazeParam = apvts.getRawParameterValue(ParameterIDs::cath_haze);
+    cathEchoParam = apvts.getRawParameterValue(ParameterIDs::cath_echo);
+    cathDriftParam = apvts.getRawParameterValue(ParameterIDs::cath_drift);
+    cathVelvetParam = apvts.getRawParameterValue(ParameterIDs::cath_velvet);
+
+    // Cache Filament effect parameters
+    filFractureParam = apvts.getRawParameterValue(ParameterIDs::fil_fracture);
+    filGlistenParam = apvts.getRawParameterValue(ParameterIDs::fil_glisten);
+    filCascadeParam = apvts.getRawParameterValue(ParameterIDs::fil_cascade);
+    filPhaseParam = apvts.getRawParameterValue(ParameterIDs::fil_phase);
+    filPrismParam = apvts.getRawParameterValue(ParameterIDs::fil_prism);
+
+    // Cache Steel Plate effect parameters
+    steelScorchParam = apvts.getRawParameterValue(ParameterIDs::steel_scorch);
+    steelRustParam = apvts.getRawParameterValue(ParameterIDs::steel_rust);
+    steelGrindParam = apvts.getRawParameterValue(ParameterIDs::steel_grind);
+    steelShredParam = apvts.getRawParameterValue(ParameterIDs::steel_shred);
+    steelSnarlParam = apvts.getRawParameterValue(ParameterIDs::steel_snarl);
+
     // Load BeatConnect configuration
     loadProjectData();
 }
@@ -72,6 +93,150 @@ juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createPa
         juce::ParameterID(ParameterIDs::bypass, ParameterIDs::kStateVersion),
         "Bypass",
         false
+    ));
+
+    // ======================================
+    // Cathode Effects (Warm, Vintage, Tube)
+    // ======================================
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::cath_ember, ParameterIDs::kStateVersion),
+        "Ember",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::cath_haze, ParameterIDs::kStateVersion),
+        "Haze",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::cath_echo, ParameterIDs::kStateVersion),
+        "Echo",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::cath_drift, ParameterIDs::kStateVersion),
+        "Drift",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::cath_velvet, ParameterIDs::kStateVersion),
+        "Velvet",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    // ======================================
+    // Filament Effects (Cold, Digital, Precise)
+    // ======================================
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::fil_fracture, ParameterIDs::kStateVersion),
+        "Fracture",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::fil_glisten, ParameterIDs::kStateVersion),
+        "Glisten",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::fil_cascade, ParameterIDs::kStateVersion),
+        "Cascade",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::fil_phase, ParameterIDs::kStateVersion),
+        "Phase",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::fil_prism, ParameterIDs::kStateVersion),
+        "Prism",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    // ======================================
+    // Steel Plate Effects (Aggressive, Industrial, Raw)
+    // ======================================
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::steel_scorch, ParameterIDs::kStateVersion),
+        "Scorch",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::steel_rust, ParameterIDs::kStateVersion),
+        "Rust",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::steel_grind, ParameterIDs::kStateVersion),
+        "Grind",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::steel_shred, ParameterIDs::kStateVersion),
+        "Shred",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::steel_snarl, ParameterIDs::kStateVersion),
+        "Snarl",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
     ));
 
     return { params.begin(), params.end() };
@@ -213,6 +378,27 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     preampDSP.setDrive(driveParam->load());
     preampDSP.setTone(toneParam->load());
     preampDSP.setOutputGain(outputParam->load());
+
+    // Update Cathode effect parameters
+    preampDSP.setCathEmber(cathEmberParam->load());
+    preampDSP.setCathHaze(cathHazeParam->load());
+    preampDSP.setCathEcho(cathEchoParam->load());
+    preampDSP.setCathDrift(cathDriftParam->load());
+    preampDSP.setCathVelvet(cathVelvetParam->load());
+
+    // Update Filament effect parameters
+    preampDSP.setFilFracture(filFractureParam->load());
+    preampDSP.setFilGlisten(filGlistenParam->load());
+    preampDSP.setFilCascade(filCascadeParam->load());
+    preampDSP.setFilPhase(filPhaseParam->load());
+    preampDSP.setFilPrism(filPrismParam->load());
+
+    // Update Steel Plate effect parameters
+    preampDSP.setSteelScorch(steelScorchParam->load());
+    preampDSP.setSteelRust(steelRustParam->load());
+    preampDSP.setSteelGrind(steelGrindParam->load());
+    preampDSP.setSteelShred(steelShredParam->load());
+    preampDSP.setSteelSnarl(steelSnarlParam->load());
 
     // Process audio
     juce::dsp::AudioBlock<float> block(buffer);

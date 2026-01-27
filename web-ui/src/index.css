@@ -256,7 +256,7 @@ body {
   position: relative;
   border-radius: 50%;
   cursor: grab;
-  transition: box-shadow 0.1s ease;
+  /* No transition on transform - rotation must be instant */
 }
 
 .knob::before {
@@ -291,7 +291,8 @@ body {
 }
 
 .knob:hover {
-  transform: scale(1.02);
+  /* Don't use transform here - it overrides the rotation */
+  filter: brightness(1.05);
 }
 
 .knob:active {
@@ -899,7 +900,8 @@ body {
     0 2px 6px rgba(0,0,0,0.4),
     0 0 8px rgba(112, 176, 240, 0.2),
     inset 0 1px 0 rgba(255,255,255,0.05);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  /* No transition on transform - must be instant */
+  transition: box-shadow 0.1s ease;
 }
 
 .filament-slider .slider-thumb::before {
@@ -916,7 +918,7 @@ body {
 }
 
 .filament-slider .slider-track:hover .slider-thumb {
-  transform: translate(-50%, -50%) scale(1.1);
+  /* Keep transform for positioning only, use box-shadow for hover effect */
   box-shadow:
     0 2px 8px rgba(0,0,0,0.5),
     0 0 12px rgba(112, 176, 240, 0.35),
@@ -1359,4 +1361,255 @@ body {
   height: 15px;
   background: linear-gradient(180deg, transparent, rgba(160, 64, 80, 0.1));
   pointer-events: none;
+}
+
+/* ============================================
+   CONTROLS WRAPPER - Contains panel + effects
+   ============================================ */
+.controls-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* ============================================
+   EFFECTS STRIP - Horizontal row of effect modules
+   ============================================ */
+.effects-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 4px;
+  backdrop-filter: blur(6px);
+}
+
+.effects-label {
+  font-family: var(--font-sans);
+  font-size: 8px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.effects-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+/* ============================================
+   EFFECT MODULE - Individual effect control
+   ============================================ */
+.effect-module {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.15s ease;
+  min-width: 58px;
+}
+
+.effect-module:hover {
+  background: rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.effect-module.active {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.effect-name {
+  font-family: var(--font-sans);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  transition: color 0.15s ease;
+}
+
+.effect-value {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  color: var(--text-dim);
+  opacity: 0.7;
+}
+
+/* Effect Knob - Smaller version */
+.effect-knob {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: grab;
+  position: relative;
+  /* No transition - rotation must be instant */
+}
+
+.effect-knob::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #3a3630 0%, #1a1815 80%);
+  box-shadow: inset 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+.effect-knob::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 45deg,
+    #2a2620 0deg,
+    #3a3630 90deg,
+    #1a1815 180deg,
+    #302820 270deg,
+    #2a2620 360deg
+  );
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+.effect-knob:hover {
+  /* Don't use transform - it overrides the rotation */
+  filter: brightness(1.08);
+}
+
+.effect-knob:active {
+  cursor: grabbing;
+}
+
+.effect-knob-cap {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.effect-knob-indicator {
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  border-radius: 1px;
+  background: linear-gradient(180deg, #a09060 0%, #806830 100%);
+  opacity: 0.8;
+  transition: all 0.15s ease;
+}
+
+/* ============================================
+   CATHODE EFFECTS THEME
+   ============================================ */
+.effects-strip.cathode {
+  background: rgba(20, 16, 12, 0.4);
+  border-color: rgba(212, 160, 48, 0.08);
+}
+
+.effect-module.cathode.active {
+  background: rgba(212, 160, 48, 0.04);
+  border-color: rgba(212, 160, 48, 0.12);
+}
+
+.effect-module.cathode.active .effect-name {
+  color: #b89040;
+}
+
+.effect-module.cathode.active .effect-knob-indicator {
+  background: linear-gradient(180deg, #d0b050 0%, #a08020 100%);
+  box-shadow: 0 0 4px rgba(212, 160, 48, 0.3);
+  opacity: 1;
+}
+
+/* ============================================
+   FILAMENT EFFECTS THEME
+   ============================================ */
+.effects-strip.filament {
+  background: rgba(8, 12, 20, 0.5);
+  border-color: rgba(112, 144, 208, 0.1);
+}
+
+.effect-module.filament .effect-knob::before {
+  background: #0c0e14;
+}
+
+.effect-module.filament .effect-knob::after {
+  background: linear-gradient(145deg, #1c2028 0%, #0e1018 100%);
+}
+
+.effect-module.filament .effect-knob-indicator {
+  background: #607090;
+  width: 2px;
+  height: 7px;
+}
+
+.effect-module.filament.active {
+  background: rgba(112, 144, 208, 0.04);
+  border-color: rgba(112, 144, 208, 0.12);
+}
+
+.effect-module.filament.active .effect-name {
+  color: #7898c0;
+}
+
+.effect-module.filament.active .effect-knob-indicator {
+  background: #7898c0;
+  box-shadow: 0 0 4px rgba(144, 184, 232, 0.35);
+  opacity: 1;
+}
+
+/* ============================================
+   STEEL PLATE EFFECTS THEME
+   ============================================ */
+.effects-strip.steelplate {
+  background: rgba(16, 16, 20, 0.5);
+  border-color: rgba(160, 64, 80, 0.08);
+}
+
+.effect-module.steelplate .effect-knob::before {
+  background: #101014;
+}
+
+.effect-module.steelplate .effect-knob::after {
+  background: conic-gradient(
+    from 45deg,
+    #282830 0deg,
+    #38383c 90deg,
+    #18181c 180deg,
+    #2c2c30 270deg,
+    #282830 360deg
+  );
+}
+
+.effect-module.steelplate .effect-knob-indicator {
+  background: #606068;
+  width: 2px;
+  height: 7px;
+}
+
+.effect-module.steelplate.active {
+  background: rgba(160, 64, 80, 0.04);
+  border-color: rgba(160, 64, 80, 0.12);
+}
+
+.effect-module.steelplate.active .effect-name {
+  color: #a05060;
+}
+
+.effect-module.steelplate.active .effect-knob-indicator {
+  background: linear-gradient(180deg, #b04050 0%, #803040 100%);
+  box-shadow: 0 0 4px rgba(160, 64, 80, 0.3);
+  opacity: 1;
 }

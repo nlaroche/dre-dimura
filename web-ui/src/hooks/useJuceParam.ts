@@ -1,72 +1,129 @@
+/**
+ * React Hooks for JUCE 8 Parameter Binding
+ */
+
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { getSliderState, getToggleState, SliderState, ToggleState } from '../lib/juce-bridge';
+import {
+  getSliderState,
+  getToggleState,
+  isInJuceWebView,
+} from '../lib/juce-bridge';
 
-export function useSliderParam(paramId: string, defaultValue = 0.5) {
-  const [value, setValue] = useState(defaultValue);
-  const sliderRef = useRef<SliderState | undefined>(undefined);
+// ==============================================================================
+// useSliderParam - Continuous Float Parameters
+// ==============================================================================
 
-  useEffect(() => {
-    const slider = getSliderState(paramId);
-    sliderRef.current = slider;
-
-    if (slider) {
-      setValue(slider.getNormalisedValue());
-
-      const handleChange = () => {
-        setValue(slider.getNormalisedValue());
-      };
-
-      slider.addEventListener('valueChanged', handleChange);
-      return () => slider.removeEventListener('valueChanged', handleChange);
-    }
-  }, [paramId]);
-
-  const setParamValue = useCallback((newValue: number) => {
-    setValue(newValue);
-    sliderRef.current?.setNormalisedValue(newValue);
-  }, []);
-
-  const dragStart = useCallback(() => {
-    sliderRef.current?.sliderDragStarted();
-  }, []);
-
-  const dragEnd = useCallback(() => {
-    sliderRef.current?.sliderDragEnded();
-  }, []);
-
-  return { value, setValue: setParamValue, dragStart, dragEnd };
+interface SliderParamOptions {
+  defaultValue?: number;
 }
 
-export function useToggleParam(paramId: string, defaultValue = false) {
-  const [value, setValue] = useState(defaultValue);
-  const toggleRef = useRef<ToggleState | undefined>(undefined);
+interface SliderParamReturn {
+  value: number;
+  setValue: (value: number) => void;
+  onDragStart: () => void;
+  onDragEnd: () => void;
+  isConnected: boolean;
+}
+
+export function useSliderParam(
+  paramId: string,
+  options: SliderParamOptions = {}
+): SliderParamReturn {
+  const { defaultValue = 0.5 } = options;
+  const [value, setValueState] = useState(defaultValue);
+  const stateRef = useRef(getSliderState(paramId));
+  const isDraggingRef = useRef(false);
+  const isConnected = isInJuceWebView();
 
   useEffect(() => {
-    const toggle = getToggleState(paramId);
-    toggleRef.current = toggle;
+    const state = stateRef.current;
 
-    if (toggle) {
-      setValue(toggle.getValue());
-
-      const handleChange = () => {
-        setValue(toggle.getValue());
-      };
-
-      toggle.addEventListener('valueChanged', handleChange);
-      return () => toggle.removeEventListener('valueChanged', handleChange);
+    if (isConnected) {
+      setValueState(state.getNormalisedValue());
     }
-  }, [paramId]);
 
-  const setParamValue = useCallback((newValue: boolean) => {
-    setValue(newValue);
-    toggleRef.current?.setValue(newValue);
+    const listenerId = state.valueChangedEvent.addListener(() => {
+      // Ignore JUCE value updates while dragging - use our optimistic value instead
+      if (!isDraggingRef.current) {
+        setValueState(state.getNormalisedValue());
+      }
+    });
+
+    return () => {
+      state.valueChangedEvent.removeListener(listenerId);
+    };
+  }, [isConnected]);
+
+  const setValue = useCallback((newValue: number) => {
+    setValueState(newValue);
+    stateRef.current.setNormalisedValue(newValue);
+  }, []);
+
+  const onDragStart = useCallback(() => {
+    isDraggingRef.current = true;
+    stateRef.current.sliderDragStarted();
+  }, []);
+
+  const onDragEnd = useCallback(() => {
+    isDraggingRef.current = false;
+    stateRef.current.sliderDragEnded();
+    // Sync with JUCE's final value after drag ends
+    setValueState(stateRef.current.getNormalisedValue());
+  }, []);
+
+  return { value, setValue, onDragStart, onDragEnd, isConnected };
+}
+
+// ==============================================================================
+// useToggleParam - Boolean Parameters
+// ==============================================================================
+
+interface ToggleParamOptions {
+  defaultValue?: boolean;
+}
+
+interface ToggleParamReturn {
+  value: boolean;
+  setValue: (value: boolean) => void;
+  toggle: () => void;
+  isConnected: boolean;
+}
+
+export function useToggleParam(
+  paramId: string,
+  options: ToggleParamOptions = {}
+): ToggleParamReturn {
+  const { defaultValue = false } = options;
+  const [value, setValueState] = useState(defaultValue);
+  const stateRef = useRef(getToggleState(paramId));
+  const isConnected = isInJuceWebView();
+
+  useEffect(() => {
+    const state = stateRef.current;
+
+    if (isConnected) {
+      setValueState(state.getValue());
+    }
+
+    const listenerId = state.valueChangedEvent.addListener(() => {
+      setValueState(state.getValue());
+    });
+
+    return () => {
+      state.valueChangedEvent.removeListener(listenerId);
+    };
+  }, [isConnected]);
+
+  const setValue = useCallback((newValue: boolean) => {
+    setValueState(newValue);
+    stateRef.current.setValue(newValue);
   }, []);
 
   const toggle = useCallback(() => {
-    const newValue = !value;
-    setValue(newValue);
-    toggleRef.current?.setValue(newValue);
-  }, [value]);
+    const newValue = !stateRef.current.getValue();
+    setValueState(newValue);
+    stateRef.current.setValue(newValue);
+  }, []);
 
-  return { value, setValue: setParamValue, toggle };
+  return { value, setValue, toggle, isConnected };
 }

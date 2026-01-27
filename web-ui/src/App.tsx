@@ -2,9 +2,35 @@ import React, { useState, useCallback } from 'react';
 import { useSliderParam, useToggleParam } from './hooks/useJuceParam';
 import { useAudioLevels } from './hooks/useAudioLevels';
 import { Knob } from './components/Knob';
+import { EffectModule } from './components/EffectModule';
 import { HearthglowBackground } from './components/artwork/HearthglowBackground';
 import { NightfallBackground } from './components/artwork/NightfallBackground';
 import { SteelplateBackground } from './components/artwork/SteelplateBackground';
+
+// Effect definitions per preamp
+const CATHODE_EFFECTS = [
+  { id: 'cath_ember', name: 'Ember' },
+  { id: 'cath_haze', name: 'Haze' },
+  { id: 'cath_echo', name: 'Echo' },
+  { id: 'cath_drift', name: 'Drift' },
+  { id: 'cath_velvet', name: 'Velvet' },
+];
+
+const FILAMENT_EFFECTS = [
+  { id: 'fil_fracture', name: 'Fracture' },
+  { id: 'fil_glisten', name: 'Glisten' },
+  { id: 'fil_cascade', name: 'Cascade' },
+  { id: 'fil_phase', name: 'Phase' },
+  { id: 'fil_prism', name: 'Prism' },
+];
+
+const STEELPLATE_EFFECTS = [
+  { id: 'steel_scorch', name: 'Scorch' },
+  { id: 'steel_rust', name: 'Rust' },
+  { id: 'steel_grind', name: 'Grind' },
+  { id: 'steel_shred', name: 'Shred' },
+  { id: 'steel_snarl', name: 'Snarl' },
+];
 
 // Preamp configurations
 const PREAMPS = [
@@ -455,37 +481,53 @@ function CathodeControls({ drive, tone, output, outputLevel }: {
   outputLevel: number;
 }) {
   return (
-    <div className="controls-panel cathode-panel">
-      <Knob
-        value={drive.value}
-        onChange={drive.setValue}
-        onDragStart={drive.onDragStart}
-        onDragEnd={drive.onDragEnd}
-        label="Drive"
-        size="large"
-      />
+    <div className="controls-wrapper">
+      <div className="controls-panel cathode-panel">
+        <Knob
+          value={drive.value}
+          onChange={drive.setValue}
+          onDragStart={drive.onDragStart}
+          onDragEnd={drive.onDragEnd}
+          label="Drive"
+          size="large"
+        />
 
-      <CathodeVUMeter level={outputLevel} />
+        <CathodeVUMeter level={outputLevel} />
 
-      <Knob
-        value={output.value}
-        onChange={output.setValue}
-        onDragStart={output.onDragStart}
-        onDragEnd={output.onDragEnd}
-        label="Output"
-        size="large"
-      />
+        <Knob
+          value={output.value}
+          onChange={output.setValue}
+          onDragStart={output.onDragStart}
+          onDragEnd={output.onDragEnd}
+          label="Output"
+          size="large"
+        />
 
-      <div className="control-divider" />
+        <div className="control-divider" />
 
-      <Knob
-        value={tone.value}
-        onChange={tone.setValue}
-        onDragStart={tone.onDragStart}
-        onDragEnd={tone.onDragEnd}
-        label="Tone"
-        size="medium"
-      />
+        <Knob
+          value={tone.value}
+          onChange={tone.setValue}
+          onDragStart={tone.onDragStart}
+          onDragEnd={tone.onDragEnd}
+          label="Tone"
+          size="medium"
+        />
+      </div>
+
+      <div className="effects-strip cathode">
+        <span className="effects-label">Effects</span>
+        <div className="effects-row">
+          {CATHODE_EFFECTS.map(effect => (
+            <EffectModule
+              key={effect.id}
+              paramId={effect.id}
+              name={effect.name}
+              theme="cathode"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -499,48 +541,64 @@ function FilamentControls({ drive, tone, output, inputLevel, outputLevel }: {
   outputLevel: number;
 }) {
   return (
-    <div className="controls-panel filament-panel">
-      {/* Main controls row */}
-      <div className="filament-main-row">
-        {/* Input section */}
-        <div className="filament-section">
-          <Knob
-            value={drive.value}
-            onChange={drive.setValue}
-            onDragStart={drive.onDragStart}
-            onDragEnd={drive.onDragEnd}
-            label="Input"
-            size="large"
-          />
-          <FilamentMiniMeter level={inputLevel} label="In" />
+    <div className="controls-wrapper">
+      <div className="controls-panel filament-panel">
+        {/* Main controls row */}
+        <div className="filament-main-row">
+          {/* Input section */}
+          <div className="filament-section">
+            <Knob
+              value={drive.value}
+              onChange={drive.setValue}
+              onDragStart={drive.onDragStart}
+              onDragEnd={drive.onDragEnd}
+              label="Input"
+              size="large"
+            />
+            <FilamentMiniMeter level={inputLevel} label="In" />
+          </div>
+
+          {/* Center oscilloscope - shows real output level and tone shape */}
+          <FilamentOscilloscope level={outputLevel} color={tone.value} />
+
+          {/* Output section */}
+          <div className="filament-section">
+            <FilamentMiniMeter level={outputLevel} label="Out" />
+            <Knob
+              value={output.value}
+              onChange={output.setValue}
+              onDragStart={output.onDragStart}
+              onDragEnd={output.onDragEnd}
+              label="Output"
+              size="large"
+            />
+          </div>
         </div>
 
-        {/* Center oscilloscope - shows real output level and tone shape */}
-        <FilamentOscilloscope level={outputLevel} color={tone.value} />
-
-        {/* Output section */}
-        <div className="filament-section">
-          <FilamentMiniMeter level={outputLevel} label="Out" />
-          <Knob
-            value={output.value}
-            onChange={output.setValue}
-            onDragStart={output.onDragStart}
-            onDragEnd={output.onDragEnd}
-            label="Output"
-            size="large"
+        {/* Color slider below - affects waveform shape */}
+        <div className="filament-color-row">
+          <FilamentSlider
+            value={tone.value}
+            onChange={tone.setValue}
+            onDragStart={tone.onDragStart}
+            onDragEnd={tone.onDragEnd}
+            label="Color"
           />
         </div>
       </div>
 
-      {/* Color slider below - affects waveform shape */}
-      <div className="filament-color-row">
-        <FilamentSlider
-          value={tone.value}
-          onChange={tone.setValue}
-          onDragStart={tone.onDragStart}
-          onDragEnd={tone.onDragEnd}
-          label="Color"
-        />
+      <div className="effects-strip filament">
+        <span className="effects-label">Effects</span>
+        <div className="effects-row">
+          {FILAMENT_EFFECTS.map(effect => (
+            <EffectModule
+              key={effect.id}
+              paramId={effect.id}
+              name={effect.name}
+              theme="filament"
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -555,37 +613,53 @@ function SteelPlateControls({ drive, tone, output, outputLevel }: {
   outputLevel: number;
 }) {
   return (
-    <div className="controls-panel steelplate-panel">
-      <Knob
-        value={drive.value}
-        onChange={drive.setValue}
-        onDragStart={drive.onDragStart}
-        onDragEnd={drive.onDragEnd}
-        label="Gain"
-        size="large"
-      />
+    <div className="controls-wrapper">
+      <div className="controls-panel steelplate-panel">
+        <Knob
+          value={drive.value}
+          onChange={drive.setValue}
+          onDragStart={drive.onDragStart}
+          onDragEnd={drive.onDragEnd}
+          label="Gain"
+          size="large"
+        />
 
-      <Knob
-        value={tone.value}
-        onChange={tone.setValue}
-        onDragStart={tone.onDragStart}
-        onDragEnd={tone.onDragEnd}
-        label="Grit"
-        size="medium"
-      />
+        <Knob
+          value={tone.value}
+          onChange={tone.setValue}
+          onDragStart={tone.onDragStart}
+          onDragEnd={tone.onDragEnd}
+          label="Grit"
+          size="medium"
+        />
 
-      <Knob
-        value={output.value}
-        onChange={output.setValue}
-        onDragStart={output.onDragStart}
-        onDragEnd={output.onDragEnd}
-        label="Level"
-        size="large"
-      />
+        <Knob
+          value={output.value}
+          onChange={output.setValue}
+          onDragStart={output.onDragStart}
+          onDragEnd={output.onDragEnd}
+          label="Level"
+          size="large"
+        />
 
-      <div className="steelplate-divider" />
+        <div className="steelplate-divider" />
 
-      <SteelPlateVisualizer level={outputLevel} />
+        <SteelPlateVisualizer level={outputLevel} />
+      </div>
+
+      <div className="effects-strip steelplate">
+        <span className="effects-label">Effects</span>
+        <div className="effects-row">
+          {STEELPLATE_EFFECTS.map(effect => (
+            <EffectModule
+              key={effect.id}
+              paramId={effect.id}
+              name={effect.name}
+              theme="steelplate"
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
