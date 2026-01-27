@@ -1,15 +1,18 @@
 import React, { useRef, useCallback } from 'react';
 
+export type KnobVariant = 'golden' | 'jade' | 'obsidian' | 'porta';
+export type KnobSize = 'normal' | 'small';
+
 interface KnobProps {
   value: number;
   onChange: (value: number) => void;
   onDragStart?: () => void;
   onDragEnd?: () => void;
   label: string;
+  variant?: KnobVariant;
+  size?: KnobSize;
   min?: number;
   max?: number;
-  size?: number;
-  color?: string;
 }
 
 export function Knob({
@@ -18,10 +21,10 @@ export function Knob({
   onDragStart,
   onDragEnd,
   label,
+  variant = 'golden',
+  size = 'normal',
   min = 0,
   max = 1,
-  size = 80,
-  color = '#c9a227',
 }: KnobProps) {
   const knobRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -33,6 +36,7 @@ export function Knob({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      e.preventDefault();
       isDragging.current = true;
       startY.current = e.clientY;
       startValue.current = value;
@@ -63,25 +67,30 @@ export function Knob({
     [value, min, max, onChange, onDragStart, onDragEnd]
   );
 
-  const displayValue = Math.round(normalizedValue * 100);
+  const handleDoubleClick = useCallback(() => {
+    onChange(0.5);
+  }, [onChange]);
+
+  const sizeClass = size === 'small' ? 'small' : '';
 
   return (
-    <div className="knob-container" style={{ width: size }}>
+    <div className={`knob-container ${variant} ${sizeClass}`}>
       <div
         ref={knobRef}
-        className="knob"
-        style={{
-          width: size,
-          height: size,
-          transform: `rotate(${rotation}deg)`,
-          cursor: 'grab',
-        }}
+        className="knob-body"
         onMouseDown={handleMouseDown}
+        onDoubleClick={handleDoubleClick}
       >
-        <div className="knob-indicator" style={{ backgroundColor: color }} />
+        <div className="knob-outer">
+          <div
+            className="knob-inner"
+            style={{ transform: `rotate(${rotation}deg)` }}
+          >
+            <div className="knob-pointer" />
+          </div>
+        </div>
       </div>
-      <div className="knob-value">{displayValue}%</div>
-      <div className="knob-label">{label}</div>
+      <span className="knob-label">{label}</span>
     </div>
   );
 }

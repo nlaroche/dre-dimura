@@ -16,9 +16,13 @@ DreDimuraProcessor::DreDimuraProcessor()
       apvts(*this, nullptr, "Parameters", createParameterLayout())
 {
     // Cache parameter pointers for real-time access
+    moduleParam = apvts.getRawParameterValue(ParameterIDs::module);
     driveParam = apvts.getRawParameterValue(ParameterIDs::drive);
     toneParam = apvts.getRawParameterValue(ParameterIDs::tone);
     outputParam = apvts.getRawParameterValue(ParameterIDs::output);
+    mixParam = apvts.getRawParameterValue(ParameterIDs::mix);
+    characterParam = apvts.getRawParameterValue(ParameterIDs::character);
+    warmthParam = apvts.getRawParameterValue(ParameterIDs::warmth);
     bypassParam = apvts.getRawParameterValue(ParameterIDs::bypass);
 
     // Load BeatConnect configuration
@@ -33,6 +37,15 @@ DreDimuraProcessor::~DreDimuraProcessor()
 juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createParameterLayout()
 {
     std::vector<std::unique_ptr<juce::RangedAudioParameter>> params;
+
+    // Module selection: 0=EP3, 1=RE201, 2=Schaffer, 3=Portastudio
+    juce::StringArray moduleNames = { "Echoplex EP-3", "Roland RE-201", "Schaffer-Vega", "TASCAM Portastudio" };
+    params.push_back(std::make_unique<juce::AudioParameterChoice>(
+        juce::ParameterID(ParameterIDs::module, ParameterIDs::kStateVersion),
+        "Module",
+        moduleNames,
+        0  // Default to EP-3
+    ));
 
     // Drive: 0% to 100%, default 25%
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -65,6 +78,36 @@ juce::AudioProcessorValueTreeState::ParameterLayout DreDimuraProcessor::createPa
                 float db = -12.0f + (value * 18.0f);
                 return juce::String(db, 1) + " dB";
             })
+    ));
+
+    // Mix: Wet/dry blend, 0% (dry) to 100% (wet), default 100%
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::mix, ParameterIDs::kStateVersion),
+        "Mix",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        1.0f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    // Character: Module-specific voicing, 0% to 100%, default 50%
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::character, ParameterIDs::kStateVersion),
+        "Character",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
+    ));
+
+    // Warmth: Low-end presence, 0% to 100%, default 50%
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(
+        juce::ParameterID(ParameterIDs::warmth, ParameterIDs::kStateVersion),
+        "Warmth",
+        juce::NormalisableRange<float>(0.0f, 1.0f, 0.01f),
+        0.5f,
+        juce::AudioParameterFloatAttributes()
+            .withStringFromValueFunction([](float value, int) { return juce::String(int(value * 100)) + "%"; })
     ));
 
     // Bypass
@@ -183,13 +226,30 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear(i, 0, buffer.getNumSamples());
 
+    // Calculate input level before processing
+    float inLevel = 0.0f;
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        inLevel = std::max(inLevel, buffer.getMagnitude(channel, 0, buffer.getNumSamples()));
+    inputLevel.store(inLevel);
+
     // Check bypass
     bool bypassed = bypassParam->load() > 0.5f;
 
     if (bypassed)
     {
         preampDSP.reset();  // Reset smoothed values to prevent clicks
+        outputLevel.store(0.0f);  // Reset output level when bypassed
         return;
+    }
+
+    // Get mix value for wet/dry blend
+    float mix = mixParam->load();
+
+    // Store dry signal if we need to blend
+    juce::AudioBuffer<float> dryBuffer;
+    if (mix < 0.99f)
+    {
+        dryBuffer.makeCopyOf(buffer);
     }
 
     // Update DSP parameters
@@ -197,10 +257,31 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     preampDSP.setTone(toneParam->load());
     preampDSP.setOutputGain(outputParam->load());
 
-    // Process audio
+    // Process audio (wet signal)
     juce::dsp::AudioBlock<float> block(buffer);
     juce::dsp::ProcessContextReplacing<float> context(block);
     preampDSP.process(context);
+
+    // Apply wet/dry mix if needed
+    if (mix < 0.99f)
+    {
+        for (int channel = 0; channel < buffer.getNumChannels(); ++channel)
+        {
+            auto* wet = buffer.getWritePointer(channel);
+            auto* dry = dryBuffer.getReadPointer(channel);
+
+            for (int sample = 0; sample < buffer.getNumSamples(); ++sample)
+            {
+                wet[sample] = dry[sample] * (1.0f - mix) + wet[sample] * mix;
+            }
+        }
+    }
+
+    // Calculate output level after processing
+    float outLevel = 0.0f;
+    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+        outLevel = std::max(outLevel, buffer.getMagnitude(channel, 0, buffer.getNumSamples()));
+    outputLevel.store(outLevel);
 }
 
 //==============================================================================

@@ -14,7 +14,8 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class DreDimuraEditor : public juce::AudioProcessorEditor
+class DreDimuraEditor : public juce::AudioProcessorEditor,
+                        private juce::Timer
 {
 public:
     explicit DreDimuraEditor(DreDimuraProcessor&);
@@ -35,21 +36,33 @@ private:
 
     //==============================================================================
     // JUCE 8 Parameter Relays - MUST be created before WebView
+    std::unique_ptr<juce::WebSliderRelay> moduleRelay;
     std::unique_ptr<juce::WebSliderRelay> driveRelay;
     std::unique_ptr<juce::WebSliderRelay> toneRelay;
     std::unique_ptr<juce::WebSliderRelay> outputRelay;
+    std::unique_ptr<juce::WebSliderRelay> mixRelay;
+    std::unique_ptr<juce::WebSliderRelay> characterRelay;
+    std::unique_ptr<juce::WebSliderRelay> warmthRelay;
     std::unique_ptr<juce::WebToggleButtonRelay> bypassRelay;
 
     //==============================================================================
     // Parameter Attachments - created AFTER WebView
+    std::unique_ptr<juce::WebSliderParameterAttachment> moduleAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> driveAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> toneAttachment;
     std::unique_ptr<juce::WebSliderParameterAttachment> outputAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> mixAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> characterAttachment;
+    std::unique_ptr<juce::WebSliderParameterAttachment> warmthAttachment;
     std::unique_ptr<juce::WebToggleButtonParameterAttachment> bypassAttachment;
 
     //==============================================================================
     void setupWebView();
     void setupRelays();
+
+    //==============================================================================
+    // Timer for audio metering
+    void timerCallback() override;
 
     //==============================================================================
     // Activation handlers (always declared, conditionally implemented)

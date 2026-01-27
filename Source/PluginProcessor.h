@@ -5,6 +5,12 @@
 
     Recreates the preamp stages of vintage effects and peripherals,
     providing "accidental mojo" and unique coloration for digital guitar tones.
+
+    Modules:
+    - Echoplex EP-3 Preamp
+    - Roland RE-201 Space Echo Preamp
+    - Dallas Wireless (Schaffer-Vega Diversity System)
+    - TASCAM Portastudio
   ==============================================================================
 */
 
@@ -94,14 +100,30 @@ private:
     juce::AudioProcessorValueTreeState apvts;
 
     // Parameter pointers for real-time access
+    std::atomic<float>* moduleParam = nullptr;
     std::atomic<float>* driveParam = nullptr;
     std::atomic<float>* toneParam = nullptr;
     std::atomic<float>* outputParam = nullptr;
+    std::atomic<float>* mixParam = nullptr;
+    std::atomic<float>* characterParam = nullptr;
+    std::atomic<float>* warmthParam = nullptr;
     std::atomic<float>* bypassParam = nullptr;
 
     //==============================================================================
     // DSP
     PreampDSP preampDSP;
+
+    //==============================================================================
+    // Audio Metering (thread-safe for real-time access)
+    std::atomic<float> inputLevel { 0.0f };
+    std::atomic<float> outputLevel { 0.0f };
+
+public:
+    // Getters for audio levels (called from UI thread)
+    float getInputLevel() const { return inputLevel.load(); }
+    float getOutputLevel() const { return outputLevel.load(); }
+
+private:
 
     //==============================================================================
     // BeatConnect project data

@@ -29,55 +29,75 @@ DreDimuraEditor::DreDimuraEditor(DreDimuraProcessor& p)
 
     // Create attachments AFTER WebView
     auto& apvts = processorRef.getAPVTS();
+    moduleAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::module), *moduleRelay, nullptr);
     driveAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
         *apvts.getParameter(ParameterIDs::drive), *driveRelay, nullptr);
     toneAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
         *apvts.getParameter(ParameterIDs::tone), *toneRelay, nullptr);
     outputAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
         *apvts.getParameter(ParameterIDs::output), *outputRelay, nullptr);
+    mixAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::mix), *mixRelay, nullptr);
+    characterAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::character), *characterRelay, nullptr);
+    warmthAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
+        *apvts.getParameter(ParameterIDs::warmth), *warmthRelay, nullptr);
     bypassAttachment = std::make_unique<juce::WebToggleButtonParameterAttachment>(
         *apvts.getParameter(ParameterIDs::bypass), *bypassRelay, nullptr);
 
-    setSize(500, 350);
-    setResizable(true, true);
-    setResizeLimits(400, 280, 800, 560);
+    setSize(1040, 650);
+    setResizable(false, false);
+
+    // Start timer for audio metering updates (30 fps)
+    startTimerHz(30);
 }
 
 DreDimuraEditor::~DreDimuraEditor()
 {
+    stopTimer();
+}
+
+//==============================================================================
+void DreDimuraEditor::timerCallback()
+{
+    if (!webView)
+        return;
+
+    // Get audio levels from processor
+    float inLevel = processorRef.getInputLevel();
+    float outLevel = processorRef.getOutputLevel();
+
+    // Send levels to WebView
+    juce::DynamicObject::Ptr data = new juce::DynamicObject();
+    data->setProperty("inputLevel", inLevel);
+    data->setProperty("outputLevel", outLevel);
+
+    webView->emitEventIfBrowserIsVisible("audioLevels", juce::var(data.get()));
 }
 
 //==============================================================================
 void DreDimuraEditor::setupRelays()
 {
     // Relay names MUST match parameter IDs exactly
+    moduleRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::module);
     driveRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::drive);
     toneRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::tone);
     outputRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::output);
+    mixRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::mix);
+    characterRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::character);
+    warmthRelay = std::make_unique<juce::WebSliderRelay>(ParameterIDs::warmth);
     bypassRelay = std::make_unique<juce::WebToggleButtonRelay>(ParameterIDs::bypass);
 }
 
 //==============================================================================
 void DreDimuraEditor::setupWebView()
 {
-    // ===========================================================================
-    // STEP 1: Get resources directory - handle both Standalone and VST3 paths
-    // ===========================================================================
-    auto executableFile = juce::File::getSpecialLocation(juce::File::currentExecutableFile);
-    auto executableDir = executableFile.getParentDirectory();
-
-    // Try Standalone path first: executable/../Resources/WebUI
-    resourcesDir = executableDir.getChildFile("Resources").getChildFile("WebUI");
-
-    // If that doesn't exist, try VST3 path: executable/../../Resources/WebUI
-    // VST3 structure: Plugin.vst3/Contents/x86_64-win/Plugin.vst3 (DLL)
-    //                 Plugin.vst3/Contents/Resources/WebUI
-    if (!resourcesDir.isDirectory())
-    {
-        resourcesDir = executableDir.getParentDirectory()
-                           .getChildFile("Resources")
-                           .getChildFile("WebUI");
-    }
+    // Get resources directory
+    resourcesDir = juce::File::getSpecialLocation(juce::File::currentExecutableFile)
+                       .getParentDirectory()
+                       .getChildFile("Resources")
+                       .getChildFile("WebUI");
 
     // ===========================================================================
     // STEP 2: Build WebBrowserComponent with JUCE 8 options
@@ -120,9 +140,13 @@ void DreDimuraEditor::setupWebView()
                 };
             })
         // Register all relays
+        .withOptionsFrom(*moduleRelay)
         .withOptionsFrom(*driveRelay)
         .withOptionsFrom(*toneRelay)
         .withOptionsFrom(*outputRelay)
+        .withOptionsFrom(*mixRelay)
+        .withOptionsFrom(*characterRelay)
+        .withOptionsFrom(*warmthRelay)
         .withOptionsFrom(*bypassRelay)
         // Activation event listeners
         .withEventListener("activateLicense", [this](const juce::var& data) {
@@ -136,7 +160,7 @@ void DreDimuraEditor::setupWebView()
         })
         .withWinWebView2Options(
             juce::WebBrowserComponent::Options::WinWebView2()
-                .withBackgroundColour(juce::Colour(0xff1a1a2e))
+                .withBackgroundColour(juce::Colour(0xff1a1a1a))
                 .withStatusBarDisabled()
                 .withUserDataFolder(
                     juce::File::getSpecialLocation(juce::File::tempDirectory)
@@ -305,7 +329,7 @@ void DreDimuraEditor::handleGetActivationStatus()
 //==============================================================================
 void DreDimuraEditor::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colour(0xff1a1a2e));
+    g.fillAll(juce::Colour(0xff1a1a1a));
 }
 
 void DreDimuraEditor::resized()
