@@ -1,3 +1,6 @@
 [submodule "JUCE"]
 	path = JUCE
 	url = https://github.com/juce-framework/JUCE.git
+[submodule "beatconnect-sdk"]
+	path = beatconnect-sdk
+	url = https://github.com/BeatConnect/beatconnect_plugin_sdk.git
