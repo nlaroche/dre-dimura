@@ -76,6 +76,9 @@ DreDimuraEditor::DreDimuraEditor(DreDimuraProcessor& p)
     steelSnarlAttachment = std::make_unique<juce::WebSliderParameterAttachment>(
         *apvts.getParameter(ParameterIDs::steel_snarl), *steelSnarlRelay, nullptr);
 
+    // Force consistent scaling regardless of OS display scaling settings
+    setScaleFactor(1.0f);
+
     setSize(900, 520);
     setResizable(true, true);
     setResizeLimits(800, 460, 1200, 700);
