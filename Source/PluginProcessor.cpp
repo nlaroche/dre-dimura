@@ -381,7 +381,8 @@ void DreDimuraProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     }
 
     // Update DSP parameters
-    int preampType = static_cast<int>(preampTypeParam->load());
+    // AudioParameterChoice returns normalized 0-1 value, convert to index
+    int preampType = static_cast<int>(std::round(preampTypeParam->load() * 2.0f));
     preampDSP.setPreampType(preampType);
     preampDSP.setDrive(driveParam->load());
     preampDSP.setTone(toneParam->load());
