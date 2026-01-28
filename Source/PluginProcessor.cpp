@@ -276,14 +276,11 @@ void DreDimuraProcessor::loadProjectData()
 
     if (enableActivation && pluginId_.isNotEmpty())
     {
-        // Create instance-based activation (not singleton!)
-        activation_ = std::make_unique<beatconnect::Activation>();
-
         beatconnect::ActivationConfig config;
         config.apiBaseUrl = apiBaseUrl_.toStdString();
         config.pluginId = pluginId_.toStdString();
         config.supabaseKey = supabasePublishableKey_.toStdString();
-        activation_->configure(config);
+        activation_ = beatconnect::Activation::create(config);
     }
 #endif
 #endif
