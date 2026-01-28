@@ -10,8 +10,20 @@ option(DRE_DIMURA_DEV_MODE "Enable development mode with hot reload" OFF)
 # BeatConnect activation option
 option(BEATCONNECT_ENABLE_ACTIVATION "Enable BeatConnect activation system" OFF)
 
-# Find JUCE - adjust path as needed
-add_subdirectory(JUCE)
+# JUCE - use JUCE_PATH if provided (CI), otherwise fetch from GitHub
+if(DEFINED JUCE_PATH AND EXISTS "${JUCE_PATH}/CMakeLists.txt")
+    message(STATUS "Using JUCE from: ${JUCE_PATH}")
+    add_subdirectory("${JUCE_PATH}" "${CMAKE_BINARY_DIR}/JUCE" EXCLUDE_FROM_ALL)
+else()
+    message(STATUS "Fetching JUCE from GitHub...")
+    include(FetchContent)
+    FetchContent_Declare(
+        JUCE
+        GIT_REPOSITORY https://github.com/juce-framework/JUCE.git
+        GIT_TAG 8.0.4
+    )
+    FetchContent_MakeAvailable(JUCE)
+endif()
 
 juce_add_plugin(${PROJECT_NAME}
     COMPANY_NAME "BeatConnect"
@@ -69,6 +81,8 @@ endif()
 
 if(BEATCONNECT_ENABLE_ACTIVATION AND EXISTS "${CMAKE_SOURCE_DIR}/beatconnect-sdk/sdk/activation/CMakeLists.txt")
     add_subdirectory(beatconnect-sdk/sdk/activation)
+    # SDK needs cryptography module for SHA256
+    target_link_libraries(beatconnect_activation PRIVATE juce::juce_cryptography)
     target_link_libraries(${PROJECT_NAME} PRIVATE beatconnect_activation)
     target_compile_definitions(${PROJECT_NAME} PUBLIC BEATCONNECT_ACTIVATION_ENABLED=1)
 else()
